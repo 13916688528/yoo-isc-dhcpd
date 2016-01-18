@@ -1,11 +1,17 @@
-FROM debian:8.1
-MAINTAINER Tad Wang <wptad@tom.com>
+FROM ubuntu:14.04
+MAINTAINER Liu Songpeng <13916688528@139.com>
 
 RUN \
-	DEBIAN_FRONTEND=noninteractive && \
-	echo "deb http://mirrors.aliyun.com/debian/ wheezy main"> /etc/apt/sources.list && \
-	echo "deb http://mirrors.aliyun.com/debian/ wheezy-updates main">> /etc/apt/sources.list && \
-	echo "deb http://security.debian.org/ wheezy/updates main">> /etc/apt/sources.list && \
+	echo "deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse"> /etc/apt/sources.list && \
+	echo "deb http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse">> /etc/apt/sources.list && \
+	echo "deb http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse">> /etc/apt/sources.list && \
+	echo "deb http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse">> /etc/apt/sources.list && \
+	echo "deb http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse">> /etc/apt/sources.list && \
+	echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse">> /etc/apt/sources.list && \
+	echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse">> /etc/apt/sources.list && \
+	echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse">> /etc/apt/sources.list && \
+	echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse">> /etc/apt/sources.list && \
+	echo "deb-src http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse">> /etc/apt/sources.list && \
 	apt-get update && \
 	apt-get install -y netmask isc-dhcp-server
 
