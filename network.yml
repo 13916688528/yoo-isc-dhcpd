@@ -1,0 +1,82 @@
+cloud-config
+
+write_files:
+  - path: /etc/modprobe.d/bonding.conf
+    content: |
+      # Prevent kernel from automatically creating bond0 when the module is loaded.
+      # This allows systemd-networkd to create and apply options to bond0.
+      options bonding max_bonds=0
+  - path: /etc/systemd/network/10-eth.network
+    permissions: 0644
+    owner: root
+    content: |
+      [Match]
+      Name=eth*
+
+      [Network]
+      Bond=bond0
+  - path: /etc/systemd/network/20-bond.netdev
+    permissions: 0644
+    owner: root
+    content: |
+      [NetDev]
+      Name=bond0
+      Kind=bond
+
+      [Bond]
+      Mode=0 # defaults to balance-rr
+      MIIMonitorSec=100
+  - path: /etc/systemd/network/30-bond-dhcp.network
+    permissions: 0644
+    owner: root
+    content: |
+      [Match]
+      Name=bond0
+
+      [Network]
+      DHCP=ipv4
+coreos:
+  units:
+    - name: down-interfaces.service
+      command: start
+      content: |
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/ip link set eth0 down
+        ExecStart=/usr/bin/ip addr flush dev eth0
+        ExecStart=/usr/bin/ip link set eth1 down
+        ExecStart=/usr/bin/ip addr flush dev eth1
+    - name: systemd-networkd.service
+      command: restart
+
+
+
+networkd and DHCP behavior
+
+By default, even if you've already set a static IP address and you have a working DHCP server in your network, systemd-networkd will nevertheless assign IP address using DHCP. If you would like to remove this address, you have to use the following cloud-config example:
+
+#cloud-config
+
+coreos:
+  units:
+    - name: systemd-networkd.service
+      command: stop
+    - name: 00-eth0.network
+      runtime: true
+      content: |
+        [Match]
+        Name=eth0
+
+        [Network]
+        DNS=1.2.3.4
+        Address=10.0.0.101/24
+        Gateway=10.0.0.1
+    - name: down-interfaces.service
+      command: start
+      content: |
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/ip link set eth0 down
+        ExecStart=/usr/bin/ip addr flush dev eth0
+    - name: systemd-networkd.service
+      command: restart
